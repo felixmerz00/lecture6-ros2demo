@@ -1,6 +1,6 @@
 # Exercise 6: ROS 2 Concepts & Building Software Packages
 
-[My fork](https://github.com/felixmerz00/lecture6-ros2demo), Felix Merz, student ID, ROS2 Humble
+[My fork](https://github.com/felixmerz00/lecture6-ros2demo), Felix Merz, 20-611-695, ROS2 Humble
 
 
 ## Exercise 1
@@ -71,3 +71,67 @@ def main(args=None):
 ![screenshot of node list](images/1b-node-list.png)
 
 pub-sub decoupling means publisher nodes run independent from its subscribers. This allows you to replace subscriber components without affecting the publisher nodes.
+
+
+## Exercise 2
+### a)
+```Bash
+$ ros2 topic list
+/clock
+/cmd_vel
+/imu
+/joint_states
+/odom
+/parameter_events
+/performance_metrics
+/robot_description
+/rosout
+/scan
+/tf
+/tf_static
+```
+
+```Bash
+$ ros2 topic info /cmd_vel
+Type: geometry_msgs/msg/Twist
+Publisher count: 1
+Subscription count: 1
+```
+
+```Bash
+$ ros2 topic hz /odom
+average rate: 27.072
+        min: 0.030s max: 0.047s std dev: 0.00408s window: 29
+average rate: 26.993
+        min: 0.030s max: 0.047s std dev: 0.00412s window: 56
+average rate: 26.525
+        min: 0.029s max: 0.053s std dev: 0.00556s window: 82
+average rate: 26.405
+        min: 0.024s max: 0.053s std dev: 0.00576s window: 109
+```
+
+`ros2 node list` lists all available nodes including my `twist_publisher` and my `odom_subscriber`.
+```Bash
+$ ros2 node list
+/gazebo
+/odom_subscriber
+/robot_state_publisher
+/turtlebot3_diff_drive
+/turtlebot3_imu
+/turtlebot3_joint_state
+/turtlebot3_laserscan
+/twist_publisher
+```
+
+/odom frequency is the refresh rate at which you receive odometry from the robot. Having a low refresh rate helps to detect and react with little lag when human intervention with the robot's course of action is necessary.
+
+`/cmd_vel` has one publisher node and one subscriber node. `ros2 topic info /cmd_vel` prints those counts. With `ros2 topic info /cmd_vel --verbose` I can find out which nodes are being counted: `twist_publisher` and `turtlebot3_diff_drive`.
+
+`ros2 topic hz` prints often a subscription node receives a message. `ros2 topic bw` prints how bandwidth these messages use.
+
+
+### b)
+
+![graph from rqt graph command](images/2b-rqt_graph.png)
+
+The graph shows the data flow between the running nodes. The `twist_publisher` makes the robot move, which triggers changes in odometry, which the `odom_subscriber` receives. When I stop my publisher node my odom monitor still works, because it is independent from the publisher. Also the robot keeps moving. Apparently it keeps repeating the last command it received and my odometry monitor correctly observes the continued movement.
