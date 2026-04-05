@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'publisher = student_robotics.circle_motion:main',
+            'subscriber = student_robotics.odom_monitor:main',
         ],
     },
 )
